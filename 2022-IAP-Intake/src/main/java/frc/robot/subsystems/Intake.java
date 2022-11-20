@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
@@ -22,7 +24,6 @@ private Timer overrideTimer = new Timer(); // We want a toggle button of some so
 private double overrideTime = 1.0;
 
 private final WPI_TalonSRX intakeFlyWheel = new WPI_TalonSRX(Constants.ShooterPorts.LeftFlywheelPort);
-
 
 private final PIDController intakeFlyWheelPID = new  PIDController(Constants.leftFlywheelPIDConsts.pidP, Constants.leftFlywheelPIDConsts.pidI, Constants.leftFlywheelPIDConsts.pidD);
 
@@ -42,6 +43,7 @@ private SimpleMotorFeedforward intakeFlyWheelFF = new  SimpleMotorFeedforward(Co
     overrideTimer.reset(); // Reset timer
 
   }
+
   public void setFlywheelPower(double speed) {
     intakeFlyWheel.set(speed);
     }
@@ -49,62 +51,42 @@ private SimpleMotorFeedforward intakeFlyWheelFF = new  SimpleMotorFeedforward(Co
     return (intakeFlyWheelPID.atSetpoint());
     }
     public void setFlywheelConstantVelocity(double RPM) {
-    intakeFlyWheel.setVoltage((intakeFlyWheelFF.calculate(RPM/60.0)) + intakeFlyWheelPID.calculate(getLeftRPM(), RPM));
+    intakeFlyWheel.setVoltage((intakeFlyWheelFF.calculate(RPM/60.0)) + intakeFlyWheelPID.calculate(getRPM(), RPM));
     }
-    public double getLeftRPM() {
+    public double getRPM() {
       return ((intakeFlyWheel.getSelectedSensorVelocity() * 10)/4096.0)*60.0;
-      }
-      public double getRightRPM() {
-      return ((intakeFlyWheel.getSelectedSensorVelocity() * 10)/4096.0)*60.0;
-      }
-      public double getLeftFlywheelPower() {
+    }
+    public double getFlywheelPower() {
       return intakeFlyWheel.get();
-      }
-      public double getRightFlywheelPower() {
-      return intakeFlyWheel.get();
-      }
-      public double getCurrent(){
+    }
+    public double getCurrent(){
         return intakeFlyWheel.getStatorCurrent();
-      }
-      public double getAverageRPM() {
-        return ((getLeftRPM()/2.0));
-        }
-        public double getFlywheelCurrent() {
+    }
+    public double getAverageRPM() {
+        return ((getRPM()/2.0));
+    }
+    public double getFlywheelCurrent() {
         return (intakeFlyWheel.getStatorCurrent()/2.0);
-        
-        }
+    }
        
-        public void resetFlywheelEncoders() {
+    public void resetFlywheelEncoders() {
         intakeFlyWheel.setSelectedSensorPosition(0, 0, 10);
-        }
+    }
+
+    public void spin(double speed){
+      intakeFlyWheel.set(ControlMode.PercentOutput, speed);
+    }
         
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-SmartDashboard.putNumber("Average RPM", getAverageRPM());
-SmartDashboard.putNumber("Average Current", getFlywheelCurrent());
-SmartDashboard.putNumber("Left Flywheel RPM", getLeftRPM());
-SmartDashboard.putNumber("Left Flywheel Power", getLeftFlywheelPower());
-SmartDashboard.putNumber("Right Flywheel RPM", getRightRPM());
-SmartDashboard.putNumber("Right Flywheel Power", getRightFlywheelPower());
-SmartDashboard.putNumber("Intake Flywheel Current", getCurrent());
-
-if (RobotContainer.getJoy1().getRawButton(2) && overrideTimer.get() >=  overrideTime) {
-  override = !override;
-  overrideTimer.reset();
-  }
-  if (override) { // Auto code
-    if (RobotContainer.getJoy1().getRawButton(1)) {
-    setFlywheelConstantVelocity(1000.0); // Sets it to 1000 RPM
-    } else {
-    setFlywheelConstantVelocity(0.0);
-    setFlywheelPower(0.0);
-    }
-    } else if (!override) { // Default manual override
-    setFlywheelPower(-1.0*RobotContainer.getJoy1().getY());
-    }
-      
+    SmartDashboard.putNumber("Average RPM", getAverageRPM());
+    SmartDashboard.putNumber("Average Current", getFlywheelCurrent());
+    SmartDashboard.putNumber("Flywheel RPM", getRPM());
+    SmartDashboard.putNumber("Flywheel Power", getFlywheelPower());
+    SmartDashboard.putNumber("Intake Flywheel Current", getCurrent());
   }
 }
+
 

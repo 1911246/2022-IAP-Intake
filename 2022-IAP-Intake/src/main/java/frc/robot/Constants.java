@@ -15,8 +15,8 @@ package frc.robot;
 public final class Constants 
 {
     public static final class ShooterPorts {
-        public static final int LeftFlywheelPort = 16;
-        public static final int RightFlywheelPort = 17;
+        public static final int LeftFlywheelPort = 1;
+        public static final int RightFlywheelPort = 17      ;
         public static final int pivotPort = 14;
         public static final int rollerPort = 15;
         }
